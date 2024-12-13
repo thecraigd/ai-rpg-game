@@ -1,0 +1,18 @@
+service: ai-rpg-game
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: eu-central-1
+
+package:
+  artifact: /Users/craigdickson/Documents/Code/ai_rpg/backend/ai-rpg-game.zip
+
+functions:
+  api:
+    handler: handler.handler
+    events:
+      - http:
+          path: /test
+          method: get
+          cors: true

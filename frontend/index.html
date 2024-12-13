@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI RPG Adventure</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>AI RPG Adventure</h1>
+            <button id="startGame" class="action-button">Start New Game</button>
+        </div>
+        
+        <div class="game-content">
+            <div id="chatbox" class="chat-container">
+                <div class="welcome-message">
+                    Welcome to the AI RPG Adventure. Click "Start New Game" to begin your journey.
+                </div>
+            </div>
+            
+            <div class="input-container">
+                <input 
+                    id="playerInput" 
+                    type="text" 
+                    placeholder="What would you like to do?" 
+                    disabled
+                >
+                <button id="sendAction" class="action-button" disabled>→</button>
+            </div>
+        </div>
+    </div>
+    <script src="game-client.js"></script>
+    <script src="interface.js"></script>
+</body>
+</html>
