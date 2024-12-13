@@ -8,6 +8,22 @@
       "name": "aws",
       "runtime": "python3.9",
       "region": "eu-central-1",
+      "environment": {
+        "TOGETHER_API_KEY": "0f8c270b6ccf51a45f84ee4ac007946324b1f3d36a63afdcb073b92b63a34aa1"
+      },
+      "iam": {
+        "role": {
+          "statements": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ssm:GetParameter"
+              ],
+              "Resource": "arn:aws:ssm:eu-central-1:507651926113:parameter/ai-rpg/together-api-key"
+            }
+          ]
+        }
+      },
       "stage": "dev",
       "versionFunctions": true,
       "compiledCloudFormationTemplate": {
@@ -77,6 +93,9 @@
                             "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/ai-rpg-game-dev*:*:*"
                           }
                         ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][0]"
                       }
                     ]
                   }
@@ -103,13 +122,18 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-eu-central-1-6d383dd6-1d73",
-                "S3Key": "serverless/ai-rpg-game/dev/1734090301459-2024-12-13T11:45:01.459Z/ai-rpg-game.zip"
+                "S3Key": "serverless/ai-rpg-game/dev/1734101581929-2024-12-13T14:53:01.929Z/ai-rpg-game.zip"
               },
               "Handler": "handler.handler",
               "Runtime": "python3.9",
               "FunctionName": "ai-rpg-game-dev-api",
               "MemorySize": 1024,
               "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "TOGETHER_API_KEY": "0f8c270b6ccf51a45f84ee4ac007946324b1f3d36a63afdcb073b92b63a34aa1"
+                }
+              },
               "Role": {
                 "Fn::GetAtt": [
                   "IamRoleLambdaExecution",
@@ -121,14 +145,14 @@
               "ApiLogGroup"
             ]
           },
-          "ApiLambdaVersiongo1cHbg6XBHaIPHZPWld1djoct8kmYecPVU2sBnuJsI": {
+          "ApiLambdaVersionkGuDeHVk4QjLdXVC11pJ3dk396k5JYcsLj4lbeit5rQ": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ApiLambdaFunction"
               },
-              "CodeSha256": "eVKURNng99dynPV29CrR3DDZN/CC5BVleuEK5v95F2w="
+              "CodeSha256": "HWkhaDCeRBNrwLzOWT2BRroY6xnxRxwUtema/eOu7iU="
             }
           },
           "ApiGatewayRestApi": {
@@ -153,6 +177,45 @@
                 ]
               },
               "PathPart": "test",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceApi": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "api",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceApiGame": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceApi"
+              },
+              "PathPart": "game",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceApiGameAction": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceApiGame"
+              },
+              "PathPart": "action",
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
@@ -197,6 +260,51 @@
               },
               "ResourceId": {
                 "Ref": "ApiGatewayResourceTest"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodApiGameActionOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceApiGameAction"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
@@ -249,7 +357,53 @@
               "ApiLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1734090297397": {
+          "ApiGatewayMethodApiGameActionPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceApiGameAction"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "ApiLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "ApiLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayDeployment1734101578616": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -259,7 +413,9 @@
             },
             "DependsOn": [
               "ApiGatewayMethodTestOptions",
-              "ApiGatewayMethodTestGet"
+              "ApiGatewayMethodApiGameActionOptions",
+              "ApiGatewayMethodTestGet",
+              "ApiGatewayMethodApiGameActionPost"
             ]
           },
           "ApiLambdaPermissionApiGateway": {
@@ -310,7 +466,7 @@
           "ApiLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ApiLambdaVersiongo1cHbg6XBHaIPHZPWld1djoct8kmYecPVU2sBnuJsI"
+              "Ref": "ApiLambdaVersionkGuDeHVk4QjLdXVC11pJ3dk396k5JYcsLj4lbeit5rQ"
             },
             "Export": {
               "Name": "sls-ai-rpg-game-dev-ApiLambdaFunctionQualifiedArn"
@@ -350,6 +506,9 @@
     "functions": {
       "api": {
         "handler": "handler.handler",
+        "package": {
+          "artifact": "./ai-rpg-game.zip"
+        },
         "events": [
           {
             "http": {
@@ -374,15 +533,38 @@
               },
               "integration": "AWS_PROXY"
             }
+          },
+          {
+            "http": {
+              "path": "api/game/action",
+              "method": "post",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "POST"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
           }
         ],
         "name": "ai-rpg-game-dev-api",
-        "package": {},
         "memory": 1024,
         "timeout": 6,
         "runtime": "python3.9",
         "vpc": {},
-        "versionLogicalId": "ApiLambdaVersiongo1cHbg6XBHaIPHZPWld1djoct8kmYecPVU2sBnuJsI"
+        "versionLogicalId": "ApiLambdaVersionkGuDeHVk4QjLdXVC11pJ3dk396k5JYcsLj4lbeit5rQ"
       }
     },
     "configValidationMode": "warn",
@@ -393,10 +575,10 @@
         "$ref": "$[\"service\"][\"provider\"]"
       },
       "package": {
-        "artifact": "/Users/craigdickson/Documents/Code/ai_rpg/backend/ai-rpg-game.zip",
+        "individually": true,
         "artifactsS3KeyDirname": "serverless/ai-rpg-game/dev/code-artifacts",
         "deploymentBucket": "serverless-framework-deployments-eu-central-1-6d383dd6-1d73",
-        "artifactDirectoryName": "serverless/ai-rpg-game/dev/1734090301459-2024-12-13T11:45:01.459Z"
+        "artifactDirectoryName": "serverless/ai-rpg-game/dev/1734101581929-2024-12-13T14:53:01.929Z"
       },
       "functions": {
         "$ref": "$[\"service\"][\"functions\"]"
@@ -407,7 +589,8 @@
     "layers": {}
   },
   "package": {
-    "artifactDirectoryName": "serverless/ai-rpg-game/dev/1734090301459-2024-12-13T11:45:01.459Z",
-    "artifact": "ai-rpg-game.zip"
+    "individually": true,
+    "artifactDirectoryName": "serverless/ai-rpg-game/dev/1734101581929-2024-12-13T14:53:01.929Z",
+    "artifact": ""
   }
 }

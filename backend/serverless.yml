@@ -4,15 +4,30 @@ provider:
   name: aws
   runtime: python3.9
   region: eu-central-1
+  environment:
+    TOGETHER_API_KEY: ${ssm:/ai-rpg/together-api-key}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action: ssm:GetParameter
+          Resource: 
+            - arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/ai-rpg/together-api-key
 
 package:
-  artifact: /Users/craigdickson/Documents/Code/ai_rpg/backend/ai-rpg-game.zip
+  individually: true
 
 functions:
   api:
     handler: handler.handler
+    package:
+      artifact: ./ai-rpg-game.zip
     events:
       - http:
           path: /test
           method: get
+          cors: true
+      - http:
+          path: /api/game/action
+          method: post
           cors: true
