@@ -2,6 +2,8 @@
 
 A modern web-based RPG powered by advanced AI technology, delivering dynamic and personalized gaming experiences through the Llama 3 70B language model.
 
+The game is available to play on my portfolio website, [craigdoesdata.com](https://www.craigdoesdata.com/rpg)
+
 ## 🌟 Features
 
 - **AI-Powered Storytelling**: Utilizes Meta's Llama 3 70B model through the Together API to generate dynamic, contextual responses to player actions
@@ -140,7 +142,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 Craig Dickson
 - Portfolio: [craigdoesdata.com](https://www.craigdoesdata.com)
-- GitHub: [@yourusername](https://github.com/thecraigd)
+- GitHub: [@thecraigd](https://github.com/thecraigd)
 
 ---
 
