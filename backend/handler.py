@@ -1,15 +1,45 @@
 import os
-from fastapi import FastAPI, HTTPException
-from mangum import Mangum
-from pydantic import BaseModel
-from typing import List, Optional
-import together
+import sys
 import json
+
+# Add debug logging at the very start
+print("Python Path:", json.dumps(sys.path))
+print("Contents of /opt/python/lib/python3.9/site-packages:", json.dumps(os.listdir("/opt/python/lib/python3.9/site-packages")) if os.path.exists("/opt/python/lib/python3.9/site-packages") else "Directory not found")
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from mangum import Mangum
+from pydantic import BaseModel, field_validator
+from typing import List
+from together import Together
+
+# Try importing pyarrow with debug info
+try:
+    import pyarrow
+    print("PyArrow version:", pyarrow.__version__)
+except Exception as e:
+    print("PyArrow import error:", str(e))
+    print("Current working directory:", os.getcwd())
+    print("Directory contents:", os.listdir('.'))
 
 app = FastAPI()
 
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://www.craigdoesdata.com"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+    expose_headers=["*"]
+)
+
 # Initialize Together client with API key from environment variable
-together.api_key = os.environ.get("TOGETHER_API_KEY")
+API_KEY = os.getenv("TOGETHER_API_KEY")
+if not API_KEY:
+    raise ValueError("TOGETHER_API_KEY environment variable is not set.")
+client = Together(api_key=API_KEY)
+
 
 class GameState(BaseModel):
     world: str
@@ -18,54 +48,65 @@ class GameState(BaseModel):
     character: str
     start: str
 
+
 class GameAction(BaseModel):
     message: str
     history: List[List[str]] = []
     game_state: GameState
 
+
 @app.get("/test")
 async def read_root():
     return {"message": "Hello from FastAPI!"}
 
+
 @app.post("/api/game/action")
 async def process_action(game_action: GameAction):
     try:
+        # Handle "start game" command
         if game_action.message.lower() == 'start game':
             return {"response": game_action.game_state.start}
 
-        system_prompt = """You are an AI Game master. Your job is to write what \
-happens next in a player's adventure game.\
-Instructions: \
-You must on only write 1-3 sentences in response. \
-Always write in second person present tense. \
-Ex. (You look north and see...)"""
+        # Define the system prompt
+        system_prompt = """You are an AI Game master. Your job is to write what happens next in a player's adventure game.
+        Instructions:
+        - Use 1-3 sentences per response.
+        - Always write in second person present tense.
+        Example: (You look north and see...)"""
 
+        # Add game-specific world information
         world_info = f"""
-World: {game_action.game_state.world}
-Station: {game_action.game_state.station}
-Town: {game_action.game_state.town}
-Your Character: {game_action.game_state.character}"""
+        World: {game_action.game_state.world}
+        Station: {game_action.game_state.station}
+        Town: {game_action.game_state.town}
+        Your Character: {game_action.game_state.character}
+        """
 
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": world_info}
-        ]
-        
-        # Add conversation history
-        for action in game_action.history:
-            messages.append({"role": "assistant", "content": action[0]})
-            messages.append({"role": "user", "content": action[1]})
+        # Build the prompt for the Together API
+        prompt = f"{system_prompt}\n\n{world_info}\n\n"
+        for assistant_msg, user_msg in game_action.history:
+            prompt += f"Assistant: {assistant_msg}\nUser: {user_msg}\n"
+        prompt += f"User: {game_action.message}\nAssistant:"
 
-        messages.append({"role": "user", "content": game_action.message})
-        
-        model_output = together.Complete.create(
-            model="meta-llama/Llama-2-70b-chat-hf",
-            messages=messages
-        )
+        # Call Together API using completions endpoint
+        try:
+            response = client.completions.create(
+                model="meta-llama/Llama-3-70b-chat-hf",
+                prompt=prompt,
+                temperature=1.0,
+                max_tokens=150
+            )
+            # Return the AI's response
+            return {"response": response.choices[0].text.strip()}
+        except Exception as api_error:
+            print(f"Together API Error: {str(api_error)}")
+            raise HTTPException(status_code=500, detail=f"Together API Error: {str(api_error)}")
 
-        return {"response": model_output.choices[0].message.content}
-    
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # Log the error and return a generic failure message
+        print(f"Error processing action: {str(e)}")
+        raise HTTPException(status_code=500, detail="An error occurred while processing your action.")
 
+
+# Handler for AWS Lambda
 handler = Mangum(app)

@@ -16,18 +16,58 @@ provider:
 
 package:
   individually: true
+  exclude:
+    - node_modules/**
+    - frontend/**
+    - dist/**
+    - __pycache__/**
+    - .git/**
+    - ".DS_Store"
+    - "*.log"
 
 functions:
   api:
     handler: handler.handler
     package:
       artifact: ./ai-rpg-game.zip
+    layers:
+      - arn:aws:lambda:eu-central-1:507651926113:layer:ai-rpg-dependencies:6
     events:
       - http:
           path: /test
           method: get
-          cors: true
+          cors:
+            origin: 'https://www.craigdoesdata.com'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
       - http:
           path: /api/game/action
           method: post
-          cors: true
+          cors:
+            origin: 'https://www.craigdoesdata.com'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
+      - http:
+          path: /api/game/action
+          method: options
+          cors:
+            origin: 'https://www.craigdoesdata.com'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    slim: true
+    strip: false
+    noDeploy:
+      - numpy
+      - pyarrow
+      - pillow

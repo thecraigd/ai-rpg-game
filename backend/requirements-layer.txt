@@ -1,0 +1,3 @@
+numpy==1.24.3  # Using a specific version for stability
+pyarrow==14.0.1
+pygments==2.17.2  # Including this since it's also relatively large (8.2MB)

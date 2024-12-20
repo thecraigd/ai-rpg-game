@@ -1,7 +1,7 @@
 {
   "/Users/craigdickson/Documents/Code/ai_rpg/backend": {
     "versionSfCore": null,
-    "versionFramework": "4.4.16",
+    "versionFramework": "4.4.18",
     "isWithinCompose": false,
     "isCompose": false,
     "composeOrgName": null,
@@ -134,7 +134,7 @@
                     "Properties": {
                       "Code": {
                         "S3Bucket": "serverless-framework-deployments-eu-central-1-6d383dd6-1d73",
-                        "S3Key": "serverless/ai-rpg-game/dev/1734101581929-2024-12-13T14:53:01.929Z/ai-rpg-game.zip"
+                        "S3Key": "serverless/ai-rpg-game/dev/1734701779681-2024-12-20T13:36:19.681Z/ai-rpg-game.zip"
                       },
                       "Handler": "handler.handler",
                       "Runtime": "python3.9",
@@ -151,20 +151,23 @@
                           "IamRoleLambdaExecution",
                           "Arn"
                         ]
-                      }
+                      },
+                      "Layers": [
+                        "arn:aws:lambda:eu-central-1:507651926113:layer:ai-rpg-dependencies:6"
+                      ]
                     },
                     "DependsOn": [
                       "ApiLogGroup"
                     ]
                   },
-                  "ApiLambdaVersionkGuDeHVk4QjLdXVC11pJ3dk396k5JYcsLj4lbeit5rQ": {
+                  "ApiLambdaVersiongn7pmvmXuujP1Qc49deteWJwYZSBYlLYiOndbs0": {
                     "Type": "AWS::Lambda::Version",
                     "DeletionPolicy": "Retain",
                     "Properties": {
                       "FunctionName": {
                         "Ref": "ApiLambdaFunction"
                       },
-                      "CodeSha256": "HWkhaDCeRBNrwLzOWT2BRroY6xnxRxwUtema/eOu7iU="
+                      "CodeSha256": "Jyo+4y+ofqIOeC/IQaLgwI0yWY/MePVhPPMW7Z9WeWE="
                     }
                   },
                   "ApiGatewayRestApi": {
@@ -244,7 +247,8 @@
                           "ResponseParameters": {
                             "method.response.header.Access-Control-Allow-Origin": true,
                             "method.response.header.Access-Control-Allow-Headers": true,
-                            "method.response.header.Access-Control-Allow-Methods": true
+                            "method.response.header.Access-Control-Allow-Methods": true,
+                            "method.response.header.Access-Control-Allow-Credentials": "<REDACTED>"
                           },
                           "ResponseModels": {}
                         }
@@ -260,9 +264,10 @@
                           {
                             "StatusCode": "200",
                             "ResponseParameters": {
-                              "method.response.header.Access-Control-Allow-Origin": "'*'",
-                              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
-                              "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                              "method.response.header.Access-Control-Allow-Origin": "'https://www.craigdoesdata.com'",
+                              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                              "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'",
+                              "method.response.header.Access-Control-Allow-Credentials": "<REDACTED>"
                             },
                             "ResponseTemplates": {
                               "application/json": ""
@@ -289,14 +294,15 @@
                           "ResponseParameters": {
                             "method.response.header.Access-Control-Allow-Origin": true,
                             "method.response.header.Access-Control-Allow-Headers": true,
-                            "method.response.header.Access-Control-Allow-Methods": true
+                            "method.response.header.Access-Control-Allow-Methods": true,
+                            "method.response.header.Access-Control-Allow-Credentials": "<REDACTED>"
                           },
                           "ResponseModels": {}
                         }
                       ],
                       "RequestParameters": {},
                       "Integration": {
-                        "Type": "MOCK",
+                        "Type": "AWS_PROXY",
                         "RequestTemplates": {
                           "application/json": "{statusCode:200}"
                         },
@@ -305,23 +311,52 @@
                           {
                             "StatusCode": "200",
                             "ResponseParameters": {
-                              "method.response.header.Access-Control-Allow-Origin": "'*'",
-                              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
-                              "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                              "method.response.header.Access-Control-Allow-Origin": "'https://www.craigdoesdata.com'",
+                              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                              "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'",
+                              "method.response.header.Access-Control-Allow-Credentials": "<REDACTED>"
                             },
                             "ResponseTemplates": {
                               "application/json": ""
                             }
                           }
-                        ]
+                        ],
+                        "IntegrationHttpMethod": "POST",
+                        "Uri": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":apigateway:",
+                              {
+                                "Ref": "AWS::Region"
+                              },
+                              ":lambda:path/2015-03-31/functions/",
+                              {
+                                "Fn::GetAtt": [
+                                  "ApiLambdaFunction",
+                                  "Arn"
+                                ]
+                              },
+                              "/invocations"
+                            ]
+                          ]
+                        }
                       },
                       "ResourceId": {
                         "Ref": "ApiGatewayResourceApiGameAction"
                       },
                       "RestApiId": {
                         "Ref": "ApiGatewayRestApi"
-                      }
-                    }
+                      },
+                      "ApiKeyRequired": "<REDACTED>"
+                    },
+                    "DependsOn": [
+                      "ApiLambdaPermissionApiGateway"
+                    ]
                   },
                   "ApiGatewayMethodTestGet": {
                     "Type": "AWS::ApiGateway::Method",
@@ -415,7 +450,7 @@
                       "ApiLambdaPermissionApiGateway"
                     ]
                   },
-                  "ApiGatewayDeployment1734101578616": {
+                  "ApiGatewayDeployment1734701772241": {
                     "Type": "AWS::ApiGateway::Deployment",
                     "Properties": {
                       "RestApiId": {
@@ -427,7 +462,8 @@
                       "ApiGatewayMethodTestOptions",
                       "ApiGatewayMethodApiGameActionOptions",
                       "ApiGatewayMethodTestGet",
-                      "ApiGatewayMethodApiGameActionPost"
+                      "ApiGatewayMethodApiGameActionPost",
+                      "ApiGatewayMethodApiGameActionOptions"
                     ]
                   },
                   "ApiLambdaPermissionApiGateway": {
@@ -478,7 +514,7 @@
                   "ApiLambdaFunctionQualifiedArn": {
                     "Description": "Current Lambda function version",
                     "Value": {
-                      "Ref": "ApiLambdaVersionkGuDeHVk4QjLdXVC11pJ3dk396k5JYcsLj4lbeit5rQ"
+                      "Ref": "ApiLambdaVersiongn7pmvmXuujP1Qc49deteWJwYZSBYlLYiOndbs0"
                     },
                     "Export": {
                       "Name": "sls-ai-rpg-game-dev-ApiLambdaFunctionQualifiedArn"
@@ -516,9 +552,18 @@
             },
             "package": {
               "individually": true,
+              "exclude": [
+                "node_modules/**",
+                "frontend/**",
+                "dist/**",
+                "__pycache__/**",
+                ".git/**",
+                ".DS_Store",
+                "*.log"
+              ],
               "artifactsS3KeyDirname": "serverless/ai-rpg-game/dev/code-artifacts",
               "deploymentBucket": "serverless-framework-deployments-eu-central-1-6d383dd6-1d73",
-              "artifactDirectoryName": "serverless/ai-rpg-game/dev/1734101581929-2024-12-13T14:53:01.929Z"
+              "artifactDirectoryName": "serverless/ai-rpg-game/dev/1734701779681-2024-12-20T13:36:19.681Z"
             },
             "functions": {
               "api": {
@@ -526,25 +571,23 @@
                 "package": {
                   "artifact": "./ai-rpg-game.zip"
                 },
+                "layers": [
+                  "arn:aws:lambda:eu-central-1:507651926113:layer:ai-rpg-dependencies:6"
+                ],
                 "events": [
                   {
                     "http": {
                       "path": "test",
                       "method": "get",
                       "cors": {
-                        "origin": "*",
+                        "origin": "https://www.craigdoesdata.com",
                         "methods": [
                           "OPTIONS",
                           "GET"
                         ],
                         "headers": [
                           "Content-Type",
-                          "X-Amz-Date",
-                          "Authorization",
-                          "X-Api-Key",
-                          "X-Amz-Security-Token",
-                          "X-Amz-User-Agent",
-                          "X-Amzn-Trace-Id"
+                          "Authorization"
                         ],
                         "allowCredentials": "<REDACTED>"
                       },
@@ -556,19 +599,32 @@
                       "path": "api/game/action",
                       "method": "post",
                       "cors": {
-                        "origin": "*",
+                        "origin": "https://www.craigdoesdata.com",
                         "methods": [
                           "OPTIONS",
                           "POST"
                         ],
                         "headers": [
                           "Content-Type",
-                          "X-Amz-Date",
-                          "Authorization",
-                          "X-Api-Key",
-                          "X-Amz-Security-Token",
-                          "X-Amz-User-Agent",
-                          "X-Amzn-Trace-Id"
+                          "Authorization"
+                        ],
+                        "allowCredentials": "<REDACTED>"
+                      },
+                      "integration": "AWS_PROXY"
+                    }
+                  },
+                  {
+                    "http": {
+                      "path": "api/game/action",
+                      "method": "options",
+                      "cors": {
+                        "origin": "https://www.craigdoesdata.com",
+                        "methods": [
+                          "OPTIONS"
+                        ],
+                        "headers": [
+                          "Content-Type",
+                          "Authorization"
                         ],
                         "allowCredentials": "<REDACTED>"
                       },
@@ -577,11 +633,26 @@
                   }
                 ],
                 "name": "ai-rpg-game-dev-api",
+                "module": ".",
                 "memory": 1024,
                 "timeout": 6,
                 "runtime": "python3.9",
                 "vpc": {},
-                "versionLogicalId": "ApiLambdaVersionkGuDeHVk4QjLdXVC11pJ3dk396k5JYcsLj4lbeit5rQ"
+                "versionLogicalId": "ApiLambdaVersiongn7pmvmXuujP1Qc49deteWJwYZSBYlLYiOndbs0"
+              }
+            },
+            "plugins": [
+              "serverless-python-requirements"
+            ],
+            "custom": {
+              "pythonRequirements": {
+                "slim": true,
+                "strip": false,
+                "noDeploy": [
+                  "numpy",
+                  "pyarrow",
+                  "pillow"
+                ]
               }
             }
           },
@@ -729,7 +800,7 @@
                     "Properties": {
                       "Code": {
                         "S3Bucket": "serverless-framework-deployments-eu-central-1-6d383dd6-1d73",
-                        "S3Key": "serverless/ai-rpg-game/dev/1734101581929-2024-12-13T14:53:01.929Z/ai-rpg-game.zip"
+                        "S3Key": "serverless/ai-rpg-game/dev/1734701779681-2024-12-20T13:36:19.681Z/ai-rpg-game.zip"
                       },
                       "Handler": "handler.handler",
                       "Runtime": "python3.9",
@@ -746,20 +817,23 @@
                           "IamRoleLambdaExecution",
                           "Arn"
                         ]
-                      }
+                      },
+                      "Layers": [
+                        "arn:aws:lambda:eu-central-1:507651926113:layer:ai-rpg-dependencies:6"
+                      ]
                     },
                     "DependsOn": [
                       "ApiLogGroup"
                     ]
                   },
-                  "ApiLambdaVersionkGuDeHVk4QjLdXVC11pJ3dk396k5JYcsLj4lbeit5rQ": {
+                  "ApiLambdaVersiongn7pmvmXuujP1Qc49deteWJwYZSBYlLYiOndbs0": {
                     "Type": "AWS::Lambda::Version",
                     "DeletionPolicy": "Retain",
                     "Properties": {
                       "FunctionName": {
                         "Ref": "ApiLambdaFunction"
                       },
-                      "CodeSha256": "HWkhaDCeRBNrwLzOWT2BRroY6xnxRxwUtema/eOu7iU="
+                      "CodeSha256": "Jyo+4y+ofqIOeC/IQaLgwI0yWY/MePVhPPMW7Z9WeWE="
                     }
                   },
                   "ApiGatewayRestApi": {
@@ -839,7 +913,8 @@
                           "ResponseParameters": {
                             "method.response.header.Access-Control-Allow-Origin": true,
                             "method.response.header.Access-Control-Allow-Headers": true,
-                            "method.response.header.Access-Control-Allow-Methods": true
+                            "method.response.header.Access-Control-Allow-Methods": true,
+                            "method.response.header.Access-Control-Allow-Credentials": "<REDACTED>"
                           },
                           "ResponseModels": {}
                         }
@@ -855,9 +930,10 @@
                           {
                             "StatusCode": "200",
                             "ResponseParameters": {
-                              "method.response.header.Access-Control-Allow-Origin": "'*'",
-                              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
-                              "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                              "method.response.header.Access-Control-Allow-Origin": "'https://www.craigdoesdata.com'",
+                              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                              "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'",
+                              "method.response.header.Access-Control-Allow-Credentials": "<REDACTED>"
                             },
                             "ResponseTemplates": {
                               "application/json": ""
@@ -884,14 +960,15 @@
                           "ResponseParameters": {
                             "method.response.header.Access-Control-Allow-Origin": true,
                             "method.response.header.Access-Control-Allow-Headers": true,
-                            "method.response.header.Access-Control-Allow-Methods": true
+                            "method.response.header.Access-Control-Allow-Methods": true,
+                            "method.response.header.Access-Control-Allow-Credentials": "<REDACTED>"
                           },
                           "ResponseModels": {}
                         }
                       ],
                       "RequestParameters": {},
                       "Integration": {
-                        "Type": "MOCK",
+                        "Type": "AWS_PROXY",
                         "RequestTemplates": {
                           "application/json": "{statusCode:200}"
                         },
@@ -900,23 +977,52 @@
                           {
                             "StatusCode": "200",
                             "ResponseParameters": {
-                              "method.response.header.Access-Control-Allow-Origin": "'*'",
-                              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
-                              "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                              "method.response.header.Access-Control-Allow-Origin": "'https://www.craigdoesdata.com'",
+                              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                              "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'",
+                              "method.response.header.Access-Control-Allow-Credentials": "<REDACTED>"
                             },
                             "ResponseTemplates": {
                               "application/json": ""
                             }
                           }
-                        ]
+                        ],
+                        "IntegrationHttpMethod": "POST",
+                        "Uri": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":apigateway:",
+                              {
+                                "Ref": "AWS::Region"
+                              },
+                              ":lambda:path/2015-03-31/functions/",
+                              {
+                                "Fn::GetAtt": [
+                                  "ApiLambdaFunction",
+                                  "Arn"
+                                ]
+                              },
+                              "/invocations"
+                            ]
+                          ]
+                        }
                       },
                       "ResourceId": {
                         "Ref": "ApiGatewayResourceApiGameAction"
                       },
                       "RestApiId": {
                         "Ref": "ApiGatewayRestApi"
-                      }
-                    }
+                      },
+                      "ApiKeyRequired": "<REDACTED>"
+                    },
+                    "DependsOn": [
+                      "ApiLambdaPermissionApiGateway"
+                    ]
                   },
                   "ApiGatewayMethodTestGet": {
                     "Type": "AWS::ApiGateway::Method",
@@ -1010,7 +1116,7 @@
                       "ApiLambdaPermissionApiGateway"
                     ]
                   },
-                  "ApiGatewayDeployment1734101578616": {
+                  "ApiGatewayDeployment1734701772241": {
                     "Type": "AWS::ApiGateway::Deployment",
                     "Properties": {
                       "RestApiId": {
@@ -1022,7 +1128,8 @@
                       "ApiGatewayMethodTestOptions",
                       "ApiGatewayMethodApiGameActionOptions",
                       "ApiGatewayMethodTestGet",
-                      "ApiGatewayMethodApiGameActionPost"
+                      "ApiGatewayMethodApiGameActionPost",
+                      "ApiGatewayMethodApiGameActionOptions"
                     ]
                   },
                   "ApiLambdaPermissionApiGateway": {
@@ -1073,7 +1180,7 @@
                   "ApiLambdaFunctionQualifiedArn": {
                     "Description": "Current Lambda function version",
                     "Value": {
-                      "Ref": "ApiLambdaVersionkGuDeHVk4QjLdXVC11pJ3dk396k5JYcsLj4lbeit5rQ"
+                      "Ref": "ApiLambdaVersiongn7pmvmXuujP1Qc49deteWJwYZSBYlLYiOndbs0"
                     },
                     "Export": {
                       "Name": "sls-ai-rpg-game-dev-ApiLambdaFunctionQualifiedArn"
@@ -1111,9 +1218,18 @@
             },
             "package": {
               "individually": true,
+              "exclude": [
+                "node_modules/**",
+                "frontend/**",
+                "dist/**",
+                "__pycache__/**",
+                ".git/**",
+                ".DS_Store",
+                "*.log"
+              ],
               "artifactsS3KeyDirname": "serverless/ai-rpg-game/dev/code-artifacts",
               "deploymentBucket": "serverless-framework-deployments-eu-central-1-6d383dd6-1d73",
-              "artifactDirectoryName": "serverless/ai-rpg-game/dev/1734101581929-2024-12-13T14:53:01.929Z"
+              "artifactDirectoryName": "serverless/ai-rpg-game/dev/1734701779681-2024-12-20T13:36:19.681Z"
             },
             "functions": {
               "api": {
@@ -1121,25 +1237,23 @@
                 "package": {
                   "artifact": "./ai-rpg-game.zip"
                 },
+                "layers": [
+                  "arn:aws:lambda:eu-central-1:507651926113:layer:ai-rpg-dependencies:6"
+                ],
                 "events": [
                   {
                     "http": {
                       "path": "test",
                       "method": "get",
                       "cors": {
-                        "origin": "*",
+                        "origin": "https://www.craigdoesdata.com",
                         "methods": [
                           "OPTIONS",
                           "GET"
                         ],
                         "headers": [
                           "Content-Type",
-                          "X-Amz-Date",
-                          "Authorization",
-                          "X-Api-Key",
-                          "X-Amz-Security-Token",
-                          "X-Amz-User-Agent",
-                          "X-Amzn-Trace-Id"
+                          "Authorization"
                         ],
                         "allowCredentials": "<REDACTED>"
                       },
@@ -1151,19 +1265,32 @@
                       "path": "api/game/action",
                       "method": "post",
                       "cors": {
-                        "origin": "*",
+                        "origin": "https://www.craigdoesdata.com",
                         "methods": [
                           "OPTIONS",
                           "POST"
                         ],
                         "headers": [
                           "Content-Type",
-                          "X-Amz-Date",
-                          "Authorization",
-                          "X-Api-Key",
-                          "X-Amz-Security-Token",
-                          "X-Amz-User-Agent",
-                          "X-Amzn-Trace-Id"
+                          "Authorization"
+                        ],
+                        "allowCredentials": "<REDACTED>"
+                      },
+                      "integration": "AWS_PROXY"
+                    }
+                  },
+                  {
+                    "http": {
+                      "path": "api/game/action",
+                      "method": "options",
+                      "cors": {
+                        "origin": "https://www.craigdoesdata.com",
+                        "methods": [
+                          "OPTIONS"
+                        ],
+                        "headers": [
+                          "Content-Type",
+                          "Authorization"
                         ],
                         "allowCredentials": "<REDACTED>"
                       },
@@ -1172,11 +1299,26 @@
                   }
                 ],
                 "name": "ai-rpg-game-dev-api",
+                "module": ".",
                 "memory": 1024,
                 "timeout": 6,
                 "runtime": "python3.9",
                 "vpc": {},
-                "versionLogicalId": "ApiLambdaVersionkGuDeHVk4QjLdXVC11pJ3dk396k5JYcsLj4lbeit5rQ"
+                "versionLogicalId": "ApiLambdaVersiongn7pmvmXuujP1Qc49deteWJwYZSBYlLYiOndbs0"
+              }
+            },
+            "plugins": [
+              "serverless-python-requirements"
+            ],
+            "custom": {
+              "pythonRequirements": {
+                "slim": true,
+                "strip": false,
+                "noDeploy": [
+                  "numpy",
+                  "pyarrow",
+                  "pillow"
+                ]
               }
             }
           },
@@ -1324,7 +1466,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-eu-central-1-6d383dd6-1d73",
-                  "S3Key": "serverless/ai-rpg-game/dev/1734101581929-2024-12-13T14:53:01.929Z/ai-rpg-game.zip"
+                  "S3Key": "serverless/ai-rpg-game/dev/1734701779681-2024-12-20T13:36:19.681Z/ai-rpg-game.zip"
                 },
                 "Handler": "handler.handler",
                 "Runtime": "python3.9",
@@ -1341,20 +1483,23 @@
                     "IamRoleLambdaExecution",
                     "Arn"
                   ]
-                }
+                },
+                "Layers": [
+                  "arn:aws:lambda:eu-central-1:507651926113:layer:ai-rpg-dependencies:6"
+                ]
               },
               "DependsOn": [
                 "ApiLogGroup"
               ]
             },
-            "ApiLambdaVersionkGuDeHVk4QjLdXVC11pJ3dk396k5JYcsLj4lbeit5rQ": {
+            "ApiLambdaVersiongn7pmvmXuujP1Qc49deteWJwYZSBYlLYiOndbs0": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
                   "Ref": "ApiLambdaFunction"
                 },
-                "CodeSha256": "HWkhaDCeRBNrwLzOWT2BRroY6xnxRxwUtema/eOu7iU="
+                "CodeSha256": "Jyo+4y+ofqIOeC/IQaLgwI0yWY/MePVhPPMW7Z9WeWE="
               }
             },
             "ApiGatewayRestApi": {
@@ -1434,7 +1579,8 @@
                     "ResponseParameters": {
                       "method.response.header.Access-Control-Allow-Origin": true,
                       "method.response.header.Access-Control-Allow-Headers": true,
-                      "method.response.header.Access-Control-Allow-Methods": true
+                      "method.response.header.Access-Control-Allow-Methods": true,
+                      "method.response.header.Access-Control-Allow-Credentials": "<REDACTED>"
                     },
                     "ResponseModels": {}
                   }
@@ -1450,9 +1596,10 @@
                     {
                       "StatusCode": "200",
                       "ResponseParameters": {
-                        "method.response.header.Access-Control-Allow-Origin": "'*'",
-                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
-                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                        "method.response.header.Access-Control-Allow-Origin": "'https://www.craigdoesdata.com'",
+                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'",
+                        "method.response.header.Access-Control-Allow-Credentials": "<REDACTED>"
                       },
                       "ResponseTemplates": {
                         "application/json": ""
@@ -1479,14 +1626,15 @@
                     "ResponseParameters": {
                       "method.response.header.Access-Control-Allow-Origin": true,
                       "method.response.header.Access-Control-Allow-Headers": true,
-                      "method.response.header.Access-Control-Allow-Methods": true
+                      "method.response.header.Access-Control-Allow-Methods": true,
+                      "method.response.header.Access-Control-Allow-Credentials": "<REDACTED>"
                     },
                     "ResponseModels": {}
                   }
                 ],
                 "RequestParameters": {},
                 "Integration": {
-                  "Type": "MOCK",
+                  "Type": "AWS_PROXY",
                   "RequestTemplates": {
                     "application/json": "{statusCode:200}"
                   },
@@ -1495,23 +1643,52 @@
                     {
                       "StatusCode": "200",
                       "ResponseParameters": {
-                        "method.response.header.Access-Control-Allow-Origin": "'*'",
-                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
-                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                        "method.response.header.Access-Control-Allow-Origin": "'https://www.craigdoesdata.com'",
+                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'",
+                        "method.response.header.Access-Control-Allow-Credentials": "<REDACTED>"
                       },
                       "ResponseTemplates": {
                         "application/json": ""
                       }
                     }
-                  ]
+                  ],
+                  "IntegrationHttpMethod": "POST",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "ApiLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
                 },
                 "ResourceId": {
                   "Ref": "ApiGatewayResourceApiGameAction"
                 },
                 "RestApiId": {
                   "Ref": "ApiGatewayRestApi"
-                }
-              }
+                },
+                "ApiKeyRequired": "<REDACTED>"
+              },
+              "DependsOn": [
+                "ApiLambdaPermissionApiGateway"
+              ]
             },
             "ApiGatewayMethodTestGet": {
               "Type": "AWS::ApiGateway::Method",
@@ -1605,7 +1782,7 @@
                 "ApiLambdaPermissionApiGateway"
               ]
             },
-            "ApiGatewayDeployment1734101578616": {
+            "ApiGatewayDeployment1734701772241": {
               "Type": "AWS::ApiGateway::Deployment",
               "Properties": {
                 "RestApiId": {
@@ -1617,7 +1794,8 @@
                 "ApiGatewayMethodTestOptions",
                 "ApiGatewayMethodApiGameActionOptions",
                 "ApiGatewayMethodTestGet",
-                "ApiGatewayMethodApiGameActionPost"
+                "ApiGatewayMethodApiGameActionPost",
+                "ApiGatewayMethodApiGameActionOptions"
               ]
             },
             "ApiLambdaPermissionApiGateway": {
@@ -1668,7 +1846,7 @@
             "ApiLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "ApiLambdaVersionkGuDeHVk4QjLdXVC11pJ3dk396k5JYcsLj4lbeit5rQ"
+                "Ref": "ApiLambdaVersiongn7pmvmXuujP1Qc49deteWJwYZSBYlLYiOndbs0"
               },
               "Export": {
                 "Name": "sls-ai-rpg-game-dev-ApiLambdaFunctionQualifiedArn"
@@ -1706,9 +1884,18 @@
       },
       "package": {
         "individually": true,
+        "exclude": [
+          "node_modules/**",
+          "frontend/**",
+          "dist/**",
+          "__pycache__/**",
+          ".git/**",
+          ".DS_Store",
+          "*.log"
+        ],
         "artifactsS3KeyDirname": "serverless/ai-rpg-game/dev/code-artifacts",
         "deploymentBucket": "serverless-framework-deployments-eu-central-1-6d383dd6-1d73",
-        "artifactDirectoryName": "serverless/ai-rpg-game/dev/1734101581929-2024-12-13T14:53:01.929Z"
+        "artifactDirectoryName": "serverless/ai-rpg-game/dev/1734701779681-2024-12-20T13:36:19.681Z"
       },
       "functions": {
         "api": {
@@ -1716,25 +1903,23 @@
           "package": {
             "artifact": "./ai-rpg-game.zip"
           },
+          "layers": [
+            "arn:aws:lambda:eu-central-1:507651926113:layer:ai-rpg-dependencies:6"
+          ],
           "events": [
             {
               "http": {
                 "path": "test",
                 "method": "get",
                 "cors": {
-                  "origin": "*",
+                  "origin": "https://www.craigdoesdata.com",
                   "methods": [
                     "OPTIONS",
                     "GET"
                   ],
                   "headers": [
                     "Content-Type",
-                    "X-Amz-Date",
-                    "Authorization",
-                    "X-Api-Key",
-                    "X-Amz-Security-Token",
-                    "X-Amz-User-Agent",
-                    "X-Amzn-Trace-Id"
+                    "Authorization"
                   ],
                   "allowCredentials": "<REDACTED>"
                 },
@@ -1746,19 +1931,32 @@
                 "path": "api/game/action",
                 "method": "post",
                 "cors": {
-                  "origin": "*",
+                  "origin": "https://www.craigdoesdata.com",
                   "methods": [
                     "OPTIONS",
                     "POST"
                   ],
                   "headers": [
                     "Content-Type",
-                    "X-Amz-Date",
-                    "Authorization",
-                    "X-Api-Key",
-                    "X-Amz-Security-Token",
-                    "X-Amz-User-Agent",
-                    "X-Amzn-Trace-Id"
+                    "Authorization"
+                  ],
+                  "allowCredentials": "<REDACTED>"
+                },
+                "integration": "AWS_PROXY"
+              }
+            },
+            {
+              "http": {
+                "path": "api/game/action",
+                "method": "options",
+                "cors": {
+                  "origin": "https://www.craigdoesdata.com",
+                  "methods": [
+                    "OPTIONS"
+                  ],
+                  "headers": [
+                    "Content-Type",
+                    "Authorization"
                   ],
                   "allowCredentials": "<REDACTED>"
                 },
@@ -1767,22 +1965,37 @@
             }
           ],
           "name": "ai-rpg-game-dev-api",
+          "module": ".",
           "memory": 1024,
           "timeout": 6,
           "runtime": "python3.9",
           "vpc": {},
-          "versionLogicalId": "ApiLambdaVersionkGuDeHVk4QjLdXVC11pJ3dk396k5JYcsLj4lbeit5rQ"
+          "versionLogicalId": "ApiLambdaVersiongn7pmvmXuujP1Qc49deteWJwYZSBYlLYiOndbs0"
+        }
+      },
+      "plugins": [
+        "serverless-python-requirements"
+      ],
+      "custom": {
+        "pythonRequirements": {
+          "slim": true,
+          "strip": false,
+          "noDeploy": [
+            "numpy",
+            "pyarrow",
+            "pillow"
+          ]
         }
       }
     },
-    "serviceRawFile": "service: ai-rpg-game\n\nprovider:\n  name: aws\n  runtime: python3.9\n  region: eu-central-1\n  environment:\n    TOGETHER_API_KEY: ${ssm:/ai-rpg/together-api-key}\n  iam:\n    role:\n      statements:\n        - Effect: Allow\n          Action: ssm:GetParameter\n          Resource: \n            - arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/ai-rpg/together-api-key\n\npackage:\n  individually: true\n\nfunctions:\n  api:\n    handler: handler.handler\n    package:\n      artifact: ./ai-rpg-game.zip\n    events:\n      - http:\n          path: /test\n          method: get\n          cors: true\n      - http:\n          path: /api/game/action\n          method: post\n          cors: true",
+    "serviceRawFile": "service: ai-rpg-game\n\nprovider:\n  name: aws\n  runtime: python3.9\n  region: eu-central-1\n  environment:\n    TOGETHER_API_KEY: ${ssm:/ai-rpg/together-api-key}\n  iam:\n    role:\n      statements:\n        - Effect: Allow\n          Action: ssm:GetParameter\n          Resource: \n            - arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/ai-rpg/together-api-key\n\npackage:\n  individually: true\n  exclude:\n    - node_modules/**\n    - frontend/**\n    - dist/**\n    - __pycache__/**\n    - .git/**\n    - \".DS_Store\"\n    - \"*.log\"\n\nfunctions:\n  api:\n    handler: handler.handler\n    package:\n      artifact: ./ai-rpg-game.zip\n    layers:\n      - arn:aws:lambda:eu-central-1:507651926113:layer:ai-rpg-dependencies:6\n    events:\n      - http:\n          path: /test\n          method: get\n          cors:\n            origin: 'https://www.craigdoesdata.com'\n            headers:\n              - Content-Type\n              - Authorization\n            allowCredentials: true\n      - http:\n          path: /api/game/action\n          method: post\n          cors:\n            origin: 'https://www.craigdoesdata.com'\n            headers:\n              - Content-Type\n              - Authorization\n            allowCredentials: true\n      - http:\n          path: /api/game/action\n          method: options\n          cors:\n            origin: 'https://www.craigdoesdata.com'\n            headers:\n              - Content-Type\n              - Authorization\n            allowCredentials: true\nplugins:\n  - serverless-python-requirements\n\ncustom:\n  pythonRequirements:\n    slim: true\n    strip: false\n    noDeploy:\n      - numpy\n      - pyarrow\n      - pillow",
     "command": [
       "deploy"
     ],
     "options": {},
     "error": null,
     "params": {},
-    "machineId": "15aa0499c0fd4eba1bb0bec6eb4d33f8",
+    "machineId": "c6ebaf296dbb35d634f9ce153f9ceae1",
     "stage": "dev",
     "accessKeyV2": "<REDACTED>",
     "accessKeyV1": "<REDACTED>",
@@ -1805,18 +2018,18 @@
     "serviceProviderAwsCredentials": "<REDACTED>",
     "serviceProviderAwsAccountId": "507651926113",
     "projectType": "traditional",
-    "versionSf": "4.4.16",
+    "versionSf": "4.4.18",
     "serviceProviderAwsCfStackName": "ai-rpg-game-dev",
     "integrations": {},
     "serviceUniqueId": "arn:aws:cloudformation:eu-central-1:507651926113:stack/ai-rpg-game-dev/dd12dfc0-b93d-11ef-80ce-025f02d38a2d",
     "serviceProviderAwsCfStackId": "arn:aws:cloudformation:eu-central-1:507651926113:stack/ai-rpg-game-dev/dd12dfc0-b93d-11ef-80ce-025f02d38a2d",
     "serviceProviderAwsCfStackCreated": "2024-12-13T10:34:42.895Z",
-    "serviceProviderAwsCfStackUpdated": "2024-12-13T14:53:10.990Z",
+    "serviceProviderAwsCfStackUpdated": "2024-12-20T13:36:28.768Z",
     "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
     "serviceProviderAwsCfStackOutputs": [
       {
         "OutputKey": "ApiLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:eu-central-1:507651926113:function:ai-rpg-game-dev-api:13",
+        "OutputValue": "arn:aws:lambda:eu-central-1:507651926113:function:ai-rpg-game-dev-api:66",
         "Description": "Current Lambda function version",
         "ExportName": "sls-ai-rpg-game-dev-ApiLambdaFunctionQualifiedArn"
       },
